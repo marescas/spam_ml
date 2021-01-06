@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  server:
+    build:
+      context: api
+      dockerfile: Dockerfile
+    environment:
+      - MONGO_HOST=database
+      - MONGO_PORT=27017
+      - MONGO_INITDB_DATABASE=sms_database
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    depends_on:
+      - database
+    ports:
+      - "8080:80"
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    environment:
+      - API_HOST=server
+      - API_PORT=80
+    ports:
+      - "8050:8050"
+  database:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=sms_database
+    ports:
+      - "27017:27017"
