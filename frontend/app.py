@@ -19,6 +19,7 @@ url_port = os.getenv("API_PORT")
 endpoint = f"http://{url_path}:{url_port}"
 # define app
 app = dash.Dash()
+server = app.server
 app.layout = html.Div(children=[
     dcc.Tabs(id="my-menu", value="tab-1", children=[
         dcc.Tab(label="classify sms", value="tab-1"),
@@ -64,9 +65,8 @@ def render_content_tab_2():
 
 
 def render_content_tab_3():
-    return html.Div([
-
-    ])
+    stats = pd.DataFrame(json.loads(requests.post(f"{endpoint}/stats").content))
+    return dcc.Graph(figure=px.pie(stats, "_id", "total"))
 
 
 @app.callback(Output("tab-info", "children"), [Input("my-menu", "value")])
@@ -84,7 +84,7 @@ def button_tab_1_pressed(n_clicks, input_text):
     if n_clicks > 0:
         return requests.post(f"{endpoint}/predict", params={"data": input_text}).text
     else:
-        return ""
+        return "Write a SMS first"
 
 
 @app.callback(Output("name_file", "children"), [Input("upload-file", "filename")])

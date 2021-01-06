@@ -44,3 +44,11 @@ def get_predictions(num_page: int = 1, page_size: int = 100) -> List[Dict]:
     n_skips = page_size * (num_page - 1)
     result = [item for item in collection.find().skip(n_skips).limit(page_size)]
     return result
+
+
+@app.post("/stats", summary="Stats for the database", tags=["Ham or Spam predictor"])
+def get_stats():
+    results = list(collection.aggregate([{"$match": {}}, {"$group": {
+        "_id": "$prediction", "total": {"$sum": 1}}}
+                                         ]))
+    return results
