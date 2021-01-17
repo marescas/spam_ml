@@ -11,12 +11,12 @@ PORT = int(os.getenv("MONGO_PORT"))
 DATABASE = os.getenv("MONGO_INITDB_DATABASE")
 USERNAME = os.getenv("MONGO_INITDB_ROOT_USERNAME")
 PASSWORD = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
-# load pretrained machine larning model
+# load pretrained machine learning model
 model = joblib.load("models/model.sav")
 # connect to mongo
 client = MongoClient(host=HOST, port=PORT, username=USERNAME, password=PASSWORD)
 db = client[DATABASE]
-# access to the collection, if not exist create it when the first item is inserted
+# access to the collection, if not exist, create it when the first item is inserted
 collection = db.sms_prediction
 
 app = FastAPI(title="Ham or Spam API", description="API to predict if a SMS is ham or spam")

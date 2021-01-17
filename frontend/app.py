@@ -1,24 +1,23 @@
 import base64
 import io
 import json
-
-import requests
 import os
-import time
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.express as px
 import dash_table
-from dash.dependencies import Output, Input, State
 import pandas as pd
+import plotly.express as px
+import requests
+from dash.dependencies import Output, Input, State
 
 # Get environment variables
 url_path = os.getenv("API_HOST")
 url_port = os.getenv("API_PORT")
 endpoint = f"http://{url_path}:{url_port}"
 # define app
-app = dash.Dash()
+app = dash.Dash(title="Simple Spam App 🧑🏻‍💻")
 server = app.server
 app.layout = html.Div(children=[
     dcc.Tabs(id="my-menu", value="tab-1", children=[
@@ -59,8 +58,15 @@ def render_content_tab_2():
         ]),
         html.Hr(),
         html.Button(id="button-tab-2", children="Submit", style={"width": "100%", "height": "60px"}),
+        html.Hr(),
 
-        dash_table.DataTable(id="datatable-tab-2", columns=[{"name": i, "id": i} for i in ["text", "prediction"]])
+        html.Div(children=
+                 dash_table.DataTable(id="datatable-tab-2",
+                                      columns=[{"name": i, "id": i} for i in ["text", "prediction"]],
+                                      page_size=11, fixed_rows={"headers": True},
+                                      style_cell={'minWidth': 100, 'maxWidth': 100, 'width': 100, 'overflow': 'hidden',
+                                                  'textOverflow': 'ellipsis', 'textAlign': 'left'}
+                                      ), style={'width': '100%', 'height': '450px'})
     ])
 
 
@@ -81,10 +87,12 @@ def render_content(tab):
 
 @app.callback(Output("label-tab-1", "children"), [Input("button-tab-1", "n_clicks")], [State("input-tab-1", "value")])
 def button_tab_1_pressed(n_clicks, input_text):
+    error_msg = "Write a SMS first"
     if n_clicks > 0:
-        return requests.post(f"{endpoint}/predict", params={"data": input_text}).text
+        result = requests.post(f"{endpoint}/predict", params={"data": input_text}).text
+        return result if result in ["ham", "spam"] else error_msg
     else:
-        return "Write a SMS first"
+        return error_msg
 
 
 @app.callback(Output("name_file", "children"), [Input("upload-file", "filename")])
@@ -111,6 +119,3 @@ def button_tab_2_pressed(n_clicks, data):
 
 if __name__ == '__main__':
     app.run_server(host="0.0.0.0", debug=False)
-    # time.sleep(10)a
-    # print(url_path, url_port)
-    # print(requests.post(f"http://{url_path}:{url_port}/predict", params={"data": "hello its me mario"}).text)
